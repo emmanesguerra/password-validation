@@ -3,12 +3,35 @@
 
   const username = ref('admin');
   const password = ref('ThisPa55wordIsOK');
+  
+  const handleSubmit = async () => {
+    
+    const API_URL = "https://api.challenge.hennge.com/password-validation-challenge-api/001/challenge-signup";
+    const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiZW1tYW4uZXNndWVycmEyMDEzQGdtYWlsLmNvbSJdLCJpc3MiOiJoZW5uZ2UtYWRtaXNzaW9uLWNoYWxsZW5nZSIsInN1YiI6ImNoYWxsZW5nZSJ9.ycnuZbUwH3R881PV80YXBXlXXdNAuCOVFgDR-orcY2o";
+
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${TOKEN}`
+        },
+        body: JSON.stringify({ username: username.value, password: password.value })
+      });
+
+      const data = await response.json();
+      console.log(data);
+
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
 
 </script>
 
 <template>
   <div class="form-wrapper">
-    <form class="form">
+    <form class="form"  @submit.prevent="handleSubmit">
       <!-- make sure the username and password are submitted -->
       <!-- make sure the inputs have the accessible names of their labels -->
       <label for="username">Username</label>
@@ -17,7 +40,7 @@
       <label for="password">Password</label>
       <input type="text" id="password" v-model="password" required/>
 
-      <button class="submit-button">Create User</button>
+      <button type="submit" class="submit-button">Create User</button>
     </form>
   </div>
 </template>

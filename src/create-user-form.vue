@@ -4,6 +4,20 @@
   const username = ref('admin');
   const password = ref('ThisPa55wordIsOK');
   const errors = ref<string[]>([]);
+
+  // Error messages mapping
+  const ERROR_MESSAGES: Record<string, string> = {
+    "invalid_request": "Something went wrong, please try again.",
+    "too_short": "Password must be at least 10 characters long",
+    "too_long": "Password must be at most 24 characters long",
+    "no_whitespace": "Password cannot contain spaces",
+    "missing_digits": "Password must contain at least one number",
+    "missing_uppercase": "Password must contain at least one uppercase letter",
+    "missing_lowercase": "Password must contain at least one lowercase letter",
+    "not_allowed": "Sorry, the entered password is not allowed, please try a different one.",
+    "unauthorized": "Not authenticated to access this resource.",
+    "server_error": "Internal Server Error."
+  };
   
   const handleSubmit = async () => {
     
@@ -24,14 +38,14 @@
       console.log(data);
 
       if (!response.ok) {
-        errors.value = data.errors || ["bad_request"];
+        errors.value = data.errors || ["server_error"];
       } else {
         console.log("Success:", data);
       }
 
     } catch (error) {
       console.error("System Error:", error);
-      errors.value = ["bad_request"];
+      errors.value = ["server_error"];
     }
   };
 
@@ -50,7 +64,7 @@
 
       <ul v-if="errors.length">
         <li v-for="(error, index) in errors" :key="index" class="error">
-          {{ error }}
+          {{ ERROR_MESSAGES[error] || "Unknown error occurred" }}
         </li>
       </ul>
 

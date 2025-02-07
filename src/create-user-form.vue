@@ -41,6 +41,7 @@
             errors.value = data.errors || ["invalid_request"];
           } else {
             console.log("Success:", data);
+            formReset();
           }
       } else {
         // text/plain
@@ -54,8 +55,15 @@
       }
     } catch (error) {
       alert(error.message);
+      formReset();
     }
   };
+
+  const formReset = () => {
+    username.value = '';
+    password.value = '';
+    errors.value = [];
+  }
 
 </script>
 

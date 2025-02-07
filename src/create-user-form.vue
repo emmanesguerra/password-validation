@@ -1,15 +1,21 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+  import { ref } from 'vue';
+
+  const username = ref('admin');
+  const password = ref('ThisPa55wordIsOK');
+
+</script>
 
 <template>
   <div class="form-wrapper">
     <form class="form">
       <!-- make sure the username and password are submitted -->
       <!-- make sure the inputs have the accessible names of their labels -->
-      <label>Username</label>
-      <input />
+      <label for="username">Username</label>
+      <input type="text" id="username" v-model="username" required/>
 
-      <label>Password</label>
-      <input />
+      <label for="password">Password</label>
+      <input type="text" id="password" v-model="password" required/>
 
       <button class="submit-button">Create User</button>
     </form>

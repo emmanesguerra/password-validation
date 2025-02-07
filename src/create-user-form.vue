@@ -3,7 +3,11 @@
 
   const username = ref('admin');
   const password = ref('ThisPa55wordIsOK');
-  const errors = ref<string[]>([]);
+  const uerrors = ref<string[]>([]);
+  const perrors = ref<string[]>([]);
+
+  const usernameInput = ref<HTMLInputElement | null>(null);
+  const passwordInput = ref<HTMLInputElement | null>(null);
 
   // Error messages mapping
   const ERROR_MESSAGES: Record<string, string> = {
@@ -21,35 +25,56 @@
     "server_error": "Something went wrong, please try again."
   };
 
-  const validateForm = (): boolean => {
-    errors.value = [];
+  const validatedUsername = () => {
+    uerrors.value = [];
 
     if (!username.value.trim()) {
-      errors.value.push("username_empty");
+      uerrors.value.push("username_empty");
     }
+  }
+
+  const validatedPassword = () => {
+    perrors.value = [];
+
     if (!password.value.trim()) {
-      errors.value.push("password_empty");
+      perrors.value.push("password_empty");
     }
     if (password.value.length < 10) {
-      errors.value.push("too_short");
+      perrors.value.push("too_short");
     }
     if (password.value.length > 24) {
-      errors.value.push("too_long");
+      perrors.value.push("too_long");
     }
     if (/\s/.test(password.value)) {
-      errors.value.push("no_whitespace");
+      perrors.value.push("no_whitespace");
     }
     if (!/\d/.test(password.value)) {
-      errors.value.push("missing_digits");
+      perrors.value.push("missing_digits");
     }
     if (!/[A-Z]/.test(password.value)) {
-      errors.value.push("missing_uppercase");
+      perrors.value.push("missing_uppercase");
     }
     if (!/[a-z]/.test(password.value)) {
-      errors.value.push("missing_lowercase");
+      perrors.value.push("missing_lowercase");
     }
+  }
 
-    return errors.value.length === 0;
+  const validateForm = (): boolean => {
+    validatedUsername();
+    validatedPassword();
+
+    // adding auto focus for invalid field
+    focusFirstError();
+
+    return uerrors.value.length === 0 && perrors.value.length === 0;
+  };
+
+  const focusFirstError = () => {
+    if (uerrors.value.length > 0 && usernameInput.value) {
+      usernameInput.value.focus();
+    } else if (perrors.value.length > 0 && passwordInput.value) {
+      passwordInput.value.focus();
+    }
   };
   
   const handleSubmit = async () => {
@@ -75,7 +100,7 @@
       if (response.headers.get('Content-Type')?.includes('application/json')) {
           const data = await response.json();
           if (!response.ok) {
-            errors.value = data.errors || ["invalid_request"];
+            perrors.value = data.errors || ["invalid_request"];
           } else {
             console.log("Success:", data);
             formReset();
@@ -99,7 +124,8 @@
   const formReset = () => {
     username.value = '';
     password.value = '';
-    errors.value = [];
+    uerrors.value = [];
+    perrors.value = [];
   }
 
 </script>
@@ -114,20 +140,35 @@
         type="text" 
         id="username" 
         v-model="username" 
+        ref="usernameInput"
+        aria-required="true"
+        :aria-invalid="uerrors.length > 0 ? 'true' : 'false'"
+        aria-describedby="username-error"
+        @blur="validatedUsername"
         />
+
+      <div id="username-error" v-if="uerrors.length" role="alert" aria-live="assertive" aria-atomic="true">
+        <ul>
+          <li v-for="(error, index) in uerrors" :key="index">{{ ERROR_MESSAGES[error] || "Unknown error occurred" }}</li>
+        </ul>
+      </div>
 
       <label for="password">Password</label>
       <input 
-        type="text" 
+        type="password" 
         id="password" 
         v-model="password"
+        ref="passwordInput"
+        :aria-invalid="perrors.length > 0 ? 'true' : 'false'"
+        aria-describedby="password-error"
+        @blur="validatedPassword"
         />
 
-      <ul v-if="errors.length">
-        <li v-for="(error, index) in errors" :key="index" class="error">
-          {{ ERROR_MESSAGES[error] || "Unknown error occurred" }}
-        </li>
-      </ul>
+      <div id="password-error" v-if="perrors.length" role="alert" aria-live="assertive" aria-atomic="true">
+        <ul>
+          <li v-for="(error, index) in perrors" :key="index">{{ ERROR_MESSAGES[error] || "Unknown error occurred" }}</li>
+        </ul>
+      </div>
 
       <button type="submit" class="submit-button">Create User</button>
     </form>
@@ -184,5 +225,11 @@ input {
 
 ul {
   margin-left: 1.5rem;
+  font-size: 90%;
+  color: #f00;
+}
+
+input[aria-invalid="true"] {
+  border: 1px solid #f00;
 }
 </style>

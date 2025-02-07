@@ -7,7 +7,7 @@
 
   // Error messages mapping
   const ERROR_MESSAGES: Record<string, string> = {
-    "invalid_request": "Something went wrong, please try again.",
+    "invalid_request": "Invalid request. Missing or incorrect parameters.",
     "too_short": "Password must be at least 10 characters long",
     "too_long": "Password must be at most 24 characters long",
     "no_whitespace": "Password cannot contain spaces",
@@ -16,7 +16,7 @@
     "missing_lowercase": "Password must contain at least one lowercase letter",
     "not_allowed": "Sorry, the entered password is not allowed, please try a different one.",
     "unauthorized": "Not authenticated to access this resource.",
-    "server_error": "Internal Server Error."
+    "server_error": "Something went wrong, please try again."
   };
   
   const handleSubmit = async () => {
@@ -34,18 +34,26 @@
         body: JSON.stringify({ username: username.value, password: password.value })
       });
 
-      const data = await response.json();
-      console.log(data);
-
-      if (!response.ok) {
-        errors.value = data.errors || ["server_error"];
+      // Check if the response is JSON
+      if (response.headers.get('Content-Type')?.includes('application/json')) {
+          const data = await response.json();
+          if (!response.ok) {
+            errors.value = data.errors || ["invalid_request"];
+          } else {
+            console.log("Success:", data);
+          }
       } else {
-        console.log("Success:", data);
-      }
+        // text/plain
+        const status = response.status;
+        let errorKey = "unauthorized";
+        if (status === 500) {
+          errorKey = "server_error";
+        }
 
+        throw new Error(ERROR_MESSAGES[errorKey]);
+      }
     } catch (error) {
-      console.error("System Error:", error);
-      errors.value = ["server_error"];
+      alert(error.message);
     }
   };
 

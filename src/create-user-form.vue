@@ -3,6 +3,7 @@
 
   const username = ref('admin');
   const password = ref('ThisPa55wordIsOK');
+  const errors = ref<string[]>([]);
   
   const handleSubmit = async () => {
     
@@ -22,8 +23,15 @@
       const data = await response.json();
       console.log(data);
 
+      if (!response.ok) {
+        errors.value = data.errors || ["bad_request"];
+      } else {
+        console.log("Success:", data);
+      }
+
     } catch (error) {
-      console.error("Error:", error);
+      console.error("System Error:", error);
+      errors.value = ["bad_request"];
     }
   };
 
@@ -39,6 +47,12 @@
 
       <label for="password">Password</label>
       <input type="text" id="password" v-model="password" required/>
+
+      <ul v-if="errors.length">
+        <li v-for="(error, index) in errors" :key="index" class="error">
+          {{ error }}
+        </li>
+      </ul>
 
       <button type="submit" class="submit-button">Create User</button>
     </form>
@@ -91,5 +105,9 @@ input {
   margin-top: 8px;
   align-self: flex-end;
   cursor: pointer;
+}
+
+ul {
+  margin-left: 1.5rem;
 }
 </style>

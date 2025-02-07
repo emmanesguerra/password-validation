@@ -1,10 +1,12 @@
 <script setup lang="ts">
-  import { ref } from 'vue';
+  import { ref, defineEmits } from 'vue';
 
-  const username = ref('admin');
-  const password = ref('ThisPa55wordIsOK');
+  const username = ref('');
+  const password = ref('');
   const uerrors = ref<string[]>([]);
   const perrors = ref<string[]>([]);
+
+  const emit = defineEmits(['create-successful']);
 
   const usernameInput = ref<HTMLInputElement | null>(null);
   const passwordInput = ref<HTMLInputElement | null>(null);
@@ -102,8 +104,7 @@
           if (!response.ok) {
             perrors.value = data.errors || ["invalid_request"];
           } else {
-            console.log("Success:", data);
-            formReset();
+            emit('create-successful');
           }
       } else {
         // text/plain

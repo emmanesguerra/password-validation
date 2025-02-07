@@ -7,6 +7,8 @@
 
   // Error messages mapping
   const ERROR_MESSAGES: Record<string, string> = {
+    "username_empty": "Username is required.",
+    "password_empty": "Password is required.",
     "invalid_request": "Invalid request. Missing or incorrect parameters.",
     "too_short": "Password must be at least 10 characters long",
     "too_long": "Password must be at most 24 characters long",
@@ -18,8 +20,43 @@
     "unauthorized": "Not authenticated to access this resource.",
     "server_error": "Something went wrong, please try again."
   };
+
+  const validateForm = (): boolean => {
+    errors.value = [];
+
+    if (!username.value.trim()) {
+      errors.value.push("username_empty");
+    }
+    if (!password.value.trim()) {
+      errors.value.push("password_empty");
+    }
+    if (password.value.length < 10) {
+      errors.value.push("too_short");
+    }
+    if (password.value.length > 24) {
+      errors.value.push("too_long");
+    }
+    if (/\s/.test(password.value)) {
+      errors.value.push("no_whitespace");
+    }
+    if (!/\d/.test(password.value)) {
+      errors.value.push("missing_digits");
+    }
+    if (!/[A-Z]/.test(password.value)) {
+      errors.value.push("missing_uppercase");
+    }
+    if (!/[a-z]/.test(password.value)) {
+      errors.value.push("missing_lowercase");
+    }
+
+    return errors.value.length === 0;
+  };
   
   const handleSubmit = async () => {
+
+    if (!validateForm()) {
+      return;
+    }
     
     const API_URL = "https://api.challenge.hennge.com/password-validation-challenge-api/001/challenge-signup";
     const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiZW1tYW4uZXNndWVycmEyMDEzQGdtYWlsLmNvbSJdLCJpc3MiOiJoZW5uZ2UtYWRtaXNzaW9uLWNoYWxsZW5nZSIsInN1YiI6ImNoYWxsZW5nZSJ9.ycnuZbUwH3R881PV80YXBXlXXdNAuCOVFgDR-orcY2o";
@@ -73,10 +110,18 @@
       <!-- make sure the username and password are submitted -->
       <!-- make sure the inputs have the accessible names of their labels -->
       <label for="username">Username</label>
-      <input type="text" id="username" v-model="username" required/>
+      <input 
+        type="text" 
+        id="username" 
+        v-model="username" 
+        />
 
       <label for="password">Password</label>
-      <input type="text" id="password" v-model="password" required/>
+      <input 
+        type="text" 
+        id="password" 
+        v-model="password"
+        />
 
       <ul v-if="errors.length">
         <li v-for="(error, index) in errors" :key="index" class="error">
